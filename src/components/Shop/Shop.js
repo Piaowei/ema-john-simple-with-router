@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import Cart from '../Cart/Cart';
 import Product from '../Product/Product';
 import { addToDb, getStoredCart } from '../../utilities/fakedb';
+// import loadData from '../'
 import './Shop.css';
+import { Link, NavLink } from 'react-router-dom';
 
 const Shop = () => {
     const [products, setProducts] = useState([]);
@@ -11,12 +13,13 @@ const Shop = () => {
     const [displayProducts, setDisplayProducts] = useState([]);
 
     useEffect(() => {
-        fetch('./products.JSON')
+        fetch('./products.json')
             .then(res => res.json())
             .then(data => {
                 setProducts(data);
                 setDisplayProducts(data);
             });
+        // console.log("Hello bay bay");
     }, []);
 
     useEffect(() => {
@@ -31,12 +34,30 @@ const Shop = () => {
                     storedCart.push(addedProduct);
                 }
             }
+            // console.log("I am from useeffect");
             setCart(storedCart);
         }
     }, [products])
 
     const handleAddToCart = (product) => {
-        const newCart = [...cart, product];
+        console.log("product is", product);
+        console.log("cart is", cart);
+        const exists = cart.find(pd => pd.key === product.key);
+        console.log("exist is", exists);
+        let newCart = [];
+        if (exists) {
+            const rest = cart.filter(pd => pd.key !== product.key);
+            exists.quantity = exists.quantity + 1;
+            console.log("Confused Product", product);
+            newCart = [...rest, product];
+            newCart = [...rest, exists];
+            console.log("New cart: ", newCart)
+        }
+        else {
+            product.quantity = 1;
+            newCart = [...cart, product];
+        }
+        // const newCart = [...cart, product];
         setCart(newCart);
         // save to local storage (for now)
         addToDb(product.key);
@@ -70,7 +91,15 @@ const Shop = () => {
                     }
                 </div>
                 <div className="cart-container">
-                    <Cart cart={cart}></Cart>
+                    <Cart cart={cart}>
+                        <Link to="/review">
+                            <button className="btn-regular" >Review order</button>
+                        </Link>
+                        <br />
+
+                        <NavLink to="/review"> <button className="btn btn-regular" >Review order2</button> </NavLink>
+
+                    </Cart>
                 </div>
             </div>
         </>
